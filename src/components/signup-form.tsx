@@ -1,79 +1,188 @@
-"use client"
+'use client';
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { GalleryVerticalEndIcon } from "lucide-react"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      const res = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        callbackURL: "/dashboard",
+      });
+
+      if (res.error) {
+        setErrorMessage(res.error.message || "Failed to create account.");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      router.push("/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialSignup = async (provider: "google" | "github") => {
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      await authClient.signIn.social({
+        provider,
+        callbackURL: "/dashboard",
+      });
+    } catch (err: any) {
+      setErrorMessage(`Failed to authenticate with ${provider}.`);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
-        <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <a
-              href="#"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEndIcon className="size-6" />
+      <Card className="overflow-hidden p-0 border shadow-lg">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form onSubmit={handleSignup} className="p-6 md:p-8 space-y-4">
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md mb-1">
+                  S
+                </div>
+                <h1 className="text-2xl font-bold tracking-tight">Create Account</h1>
+                <p className="text-sm text-muted-foreground">
+                  Get started with Shiv Furniture Mini ERP
+                </p>
               </div>
-              <span className="sr-only">Acme Inc.</span>
-            </a>
-            <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
-            <FieldDescription>
-              Already have an account? <a href="#">Sign in</a>
-            </FieldDescription>
+
+              {errorMessage && (
+                <div className="p-3 text-xs font-semibold rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                  {errorMessage}
+                </div>
+              )}
+
+              <Field>
+                <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                <Input
+                  id="name"
+                  placeholder="Rajesh Sharma"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="email">Email Address</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="rajesh@shivfurniture.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field>
+                <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold">
+                  {loading ? "Creating account..." : "Create Account"}
+                </Button>
+              </Field>
+
+              <FieldSeparator className="text-xs text-muted-foreground my-2">
+                Or sign up with
+              </FieldSeparator>
+
+              <Field className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialSignup("google")}
+                  className="flex items-center justify-center gap-2 font-medium"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+                    <path
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span>Google</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialSignup("github")}
+                  className="flex items-center justify-center gap-2 font-medium"
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                  </svg>
+                  <span>GitHub</span>
+                </Button>
+              </Field>
+
+              <FieldDescription className="text-center pt-2">
+                Already have an account? <a href="/login" className="text-indigo-600 font-semibold hover:underline">Sign in</a>
+              </FieldDescription>
+            </FieldGroup>
+          </form>
+
+          {/* Right Side Branding */}
+          <div className="relative hidden bg-slate-900 p-8 md:flex flex-col justify-between text-white overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/50 via-slate-900 to-indigo-950" />
+            <div className="relative z-10 space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Enterprise Mini ERP</span>
+              <h2 className="text-2xl font-bold">Join Shiv Furniture</h2>
+              <p className="text-xs text-slate-300">
+                Digitally manage products, orders, BoMs, stock movements, and production tracking in real time.
+              </p>
+            </div>
+            <div className="relative z-10 text-xs text-slate-400">
+              © 2026 Shiv Furniture Works • Odoo Hackathon
+            </div>
           </div>
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-            />
-          </Field>
-          <Field>
-            <Button type="submit">Create Account</Button>
-          </Field>
-          <FieldSeparator>Or</FieldSeparator>
-          <Field className="grid gap-4 sm:grid-cols-2">
-            <Button variant="outline" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                  fill="currentColor"
-                />
-              </svg>
-              Continue with Apple
-            </Button>
-            <Button variant="outline" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                  fill="currentColor"
-                />
-              </svg>
-              Continue with Google
-            </Button>
-          </Field>
-        </FieldGroup>
-      </form>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

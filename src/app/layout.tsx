@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryProvider } from "@/providers/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ERP System",
-  description: "A simple ERP system built with Next.js, Drizzle ORM,",
+  title: "Shiv Furniture Mini ERP System",
+  description: "Demand to Delivery Centralized Mini ERP platform built with Next.js, Drizzle ORM, Zustand, and TanStack Query.",
 };
 
 export default function RootLayout({
@@ -29,9 +30,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-      <TooltipProvider>
-        {children}
-      </TooltipProvider>
+        <QueryProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </QueryProvider>
       </body>
     </html>
   );
