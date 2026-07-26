@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
-import { usersTable } from "@/db/schema";
-
-
+import { user } from "@/db/schema";
 
 export async function GET(request: NextRequest) {
     try {
-       const users = await db.select().from(usersTable);
+       const users = await db.select().from(user);
 
        return NextResponse.
        json({ 
