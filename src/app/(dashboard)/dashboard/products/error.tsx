@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function SalesError({
+export default function ProductsError({
   error,
   reset,
 }: {
@@ -22,44 +22,35 @@ export default function SalesError({
   reset: () => void;
 }) {
   React.useEffect(() => {
-    console.error("Sales module error:", error);
+    console.error("Products Segment Error:", error);
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center p-4">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md border-destructive/20 shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <AlertCircle className="size-6" />
           </div>
-          <CardTitle className="text-xl">Failed to Load Sales Orders</CardTitle>
+          <CardTitle className="text-xl font-bold">Failed to load Products</CardTitle>
           <CardDescription>
-            An unexpected error occurred while fetching or rendering sales data.
+            An error occurred while loading catalog data or product specifications.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-            <p className="font-mono">{error?.message || "Unknown error occurred"}</p>
-            {error?.digest && (
-              <p className="mt-1 font-mono text-[10px] text-muted-foreground/70">
-                Digest: {error.digest}
-              </p>
-            )}
-          </div>
+        <CardContent className="space-y-2 text-center text-sm text-muted-foreground">
+          <p className="rounded-md bg-muted p-2 font-mono text-xs text-foreground">
+            {error.message || "An unexpected error occurred."}
+          </p>
+          {error.digest && (
+            <p className="text-[10px] text-muted-foreground">Digest: {error.digest}</p>
+          )}
         </CardContent>
-        <CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            render={<Link href="/dashboard" />}
-          >
+        <CardFooter className="flex justify-center gap-3 pt-2">
+          <Button variant="outline" size="sm" render={<Link href="/dashboard" />}>
             <ArrowLeft className="mr-2 size-4" />
             Dashboard
           </Button>
-          <Button
-            onClick={() => reset()}
-            className="w-full sm:w-auto"
-          >
+          <Button size="sm" onClick={() => reset()}>
             <RefreshCw className="mr-2 size-4" />
             Try Again
           </Button>

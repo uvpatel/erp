@@ -14,6 +14,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+import { isUrlActive } from "@/lib/utils"
+
 export interface NavSecondaryItem {
   title: string
   url: string
@@ -52,7 +54,7 @@ export function NavSecondary({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}
-                isActive={pathname === item.url}
+                isActive={isUrlActive(pathname, item.url)}
                 render={<Link href={item.url} />}
               >
                 {renderIcon(item.icon)}

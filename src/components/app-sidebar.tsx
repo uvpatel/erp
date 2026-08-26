@@ -59,12 +59,6 @@ export const sidebarData: AppSidebarData = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboard,
-      items: [
-        {
-          title: "Overview",
-          url: "/dashboard",
-        },
-      ],
     },
 
     {
@@ -123,24 +117,12 @@ export const sidebarData: AppSidebarData = {
       title: "Manufacturing",
       url: "/dashboard/manufacturing",
       icon: Factory,
-      items: [
-        {
-          title: "Manufacturing Orders",
-          url: "/dashboard/manufacturing",
-        },
-      ],
     },
 
     {
       title: "Inventory",
       url: "/dashboard/inventory",
       icon: Warehouse,
-      items: [
-        {
-          title: "Stock Overview",
-          url: "/dashboard/inventory",
-        },
-      ],
     },
 
     {

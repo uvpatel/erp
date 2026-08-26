@@ -20,6 +20,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { isUrlActive } from "@/lib/utils"
 
 export interface NavSubItem {
   title: string
@@ -39,17 +40,83 @@ export interface NavMainProps {
   items: NavMainItem[]
 }
 
+function renderNavIcon(icon?: NavMainItem["icon"]) {
+  if (!icon) return null
+  if (React.isValidElement(icon)) {
+    return icon
+  }
+  const IconComponent = icon as React.ComponentType<{ className?: string }>
+  return <IconComponent className="size-4" />
+}
+
+function CollapsibleNavItem({
+  item,
+  pathname,
+}: {
+  item: NavMainItem
+  pathname: string
+}) {
+  const isItemActive = React.useMemo(() => {
+    if (typeof item.isActive === "boolean") return item.isActive
+    if (isUrlActive(pathname, item.url)) return true
+    return Boolean(
+      item.items?.some((sub) => isUrlActive(pathname, sub.url))
+    )
+  }, [item, pathname])
+
+  const [userToggledOpen, setUserToggledOpen] = React.useState<boolean | null>(null)
+  const [prevActive, setPrevActive] = React.useState(isItemActive)
+
+  if (prevActive !== isItemActive) {
+    setPrevActive(isItemActive)
+    setUserToggledOpen(null)
+  }
+
+  const isOpen = userToggledOpen ?? isItemActive
+
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setUserToggledOpen}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger
+          render={
+            <SidebarMenuButton
+              tooltip={item.title}
+              isActive={isItemActive}
+            />
+          }
+        >
+          {renderNavIcon(item.icon)}
+          <span>{item.title}</span>
+          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.items?.map((subItem) => {
+              const isSubActive = isUrlActive(pathname, subItem.url, true)
+              return (
+                <SidebarMenuSubItem key={subItem.title}>
+                  <SidebarMenuSubButton
+                    isActive={isSubActive}
+                    render={<Link href={subItem.url} />}
+                  >
+                    <span>{subItem.title}</span>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )
+            })}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}
+
 export function NavMain({ label = "Platform", items }: NavMainProps) {
   const pathname = usePathname()
-
-  const renderIcon = (icon?: NavMainItem["icon"]) => {
-    if (!icon) return null
-    if (React.isValidElement(icon)) {
-      return icon
-    }
-    const IconComponent = icon as React.ComponentType<{ className?: string }>
-    return <IconComponent className="size-4" />
-  }
 
   return (
     <SidebarGroup>
@@ -57,20 +124,18 @@ export function NavMain({ label = "Platform", items }: NavMainProps) {
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = Boolean(item.items && item.items.length > 0)
-          const isCurrentActive =
-            item.isActive ??
-            (pathname === item.url ||
-              (hasSubItems && item.items?.some((sub) => pathname.startsWith(sub.url))))
 
           if (!hasSubItems) {
+            const isSingleActive =
+              item.isActive ?? isUrlActive(pathname, item.url)
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  isActive={pathname === item.url}
+                  isActive={isSingleActive}
                   render={<Link href={item.url} />}
                 >
-                  {renderIcon(item.icon)}
+                  {renderNavIcon(item.icon)}
                   <span>{item.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -78,44 +143,16 @@ export function NavMain({ label = "Platform", items }: NavMainProps) {
           }
 
           return (
-            <Collapsible
+            <CollapsibleNavItem
               key={item.title}
-              defaultOpen={isCurrentActive}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger
-                  render={
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      isActive={isCurrentActive}
-                    />
-                  }
-                >
-                  {renderIcon(item.icon)}
-                  <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton
-                          isActive={pathname === subItem.url}
-                          render={<Link href={subItem.url} />}
-                        >
-                          <span>{subItem.title}</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+              item={item}
+              pathname={pathname}
+            />
           )
         })}
       </SidebarMenu>
     </SidebarGroup>
   )
 }
+
 

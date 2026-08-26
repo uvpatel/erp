@@ -28,6 +28,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { isUrlActive } from "@/lib/utils"
+
 export interface NavProjectItem {
   name: string
   url: string
@@ -63,7 +65,7 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton
               tooltip={item.name}
-              isActive={pathname === item.url}
+              isActive={isUrlActive(pathname, item.url)}
               render={<Link href={item.url} />}
             >
               {renderIcon(item.icon)}
