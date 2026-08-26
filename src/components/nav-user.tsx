@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import {
   Avatar,
   AvatarFallback,
@@ -21,35 +22,56 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { authClient } from "@/lib/auth-client"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import {
+  EllipsisVerticalIcon,
+  CircleUserRoundIcon,
+  CreditCardIcon,
+  BellIcon,
+  LogOutIcon,
+} from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
+import { ModeToggle } from "./modetoggle"
 
+export interface NavUserData {
+  name: string
+  email: string
+  avatar?: string
+}
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+export interface NavUserProps {
+  user: NavUserData
+}
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
-   const { data: session, isPending, error } = authClient.useSession();
-  const router = useRouter();
-   if (isPending) return <div>Loading...</div>;
-  if (!session) return <div>Not logged in</div>;
+  const { data: session } = authClient.useSession()
+  const router = useRouter()
 
-   const handleLogout = async () => {
+  
+  const currentUser = {
+    name: session?.user?.name || user.name || "User",
+    email: session?.user?.email || user.email || "",
+    avatar: session?.user?.image || user.avatar || "",
+  }
+
+  const initials = currentUser.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "U"
+
+  const handleLogout = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/signin"); // Redirect after successful logout
+          router.push("/sign-in")
         },
       },
-    });
-  };
+    })
+  }
+
 
   return (
     <SidebarMenu>
@@ -61,13 +83,13 @@ export function NavUser({
             }
           >
             <Avatar className="size-8 rounded-lg grayscale">
-              <AvatarImage src={session.user.image ?? " "} alt={session.user.name} />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+              <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{session.user.name}</span>
+              <span className="truncate font-medium">{session?.user?.name || user.name || "User"}</span>
               <span className="truncate text-xs text-foreground/70">
-                {session.user.email}
+                {currentUser.email}
               </span>
             </div>
             <EllipsisVerticalIcon className="ml-auto size-4" />
@@ -82,13 +104,13 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8">
-                    <AvatarImage src={session.user.image ?? " "} alt={session.user.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{session.user.name}</span>
+                    <span className="truncate font-medium">{currentUser.name}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {session.user.email}
+                      {currentUser.email}
                     </span>
                   </div>
                 </div>
@@ -97,29 +119,43 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <CircleUserRoundIcon
-                />
-              <Link href="/account">   Account
-              </Link>
+              <ModeToggle />
+                <span>Change Theme</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-               <Link href="/billing">  Billing </Link>
+              <DropdownMenuItem
+
+                render={
+                  <Link href="/account" className="flex w-full items-center gap-2" />
+                }
+              >
+
+                <CircleUserRoundIcon className="size-4" />
+                <span>Account</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                <Link href="/notifications"> Notifications </Link>
+              <DropdownMenuItem
+                render={
+                  <Link href="/billing" className="flex w-full items-center gap-2" />
+                }
+              >
+                <CreditCardIcon className="size-4" />
+                <span>Billing</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                render={
+                  <Link href="/notification" className="flex w-full items-center gap-2" />
+                }
+              >
+                <BellIcon className="size-4" />
+                <span>Notifications</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOutIcon
-              />
-              <button onClick={handleLogout}>
-      Sign Out
-    </button>
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <LogOutIcon className="size-4" />
+              <span>Sign Out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -127,3 +163,4 @@ export function NavUser({
     </SidebarMenu>
   )
 }
+

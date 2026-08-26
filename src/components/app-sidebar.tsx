@@ -2,60 +2,82 @@
 
 import * as React from "react"
 import {
-  BoxesIcon,
-  ChartNoAxesCombinedIcon,
-  ClipboardListIcon,
-  FactoryIcon,
-  FileClockIcon,
-  LayoutDashboardIcon,
-  PackageIcon,
-  Settings2Icon,
-  ShieldCheckIcon,
-  ShoppingCartIcon,
-  TruckIcon,
-  UsersIcon,
-  WarehouseIcon,
+  Building2,
+  ChartNoAxesCombined,
+  ClipboardList,
+  Factory,
+  FileClock,
+  LayoutDashboard,
+  Package,
+  Settings2,
+  ShoppingCart,
+  Truck,
+  Warehouse,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain, type NavMainItem } from "@/components/nav-main"
+import { NavProjects, type NavProjectItem } from "@/components/nav-projects"
+import { NavUser, type NavUserData } from "@/components/nav-user"
+import { TeamSwitcher, type Team } from "@/components/team-switcher"
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 
-const data = {
+export interface AppSidebarData {
+  user: NavUserData
+  teams: Team[]
+  navMain: NavMainItem[]
+  projects: NavProjectItem[]
+}
+
+export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  data?: AppSidebarData
+}
+
+export const sidebarData: AppSidebarData = {
   user: {
     name: "ERP Admin",
     email: "admin@example.com",
     avatar: "/avatars/admin.jpg",
   },
 
+  teams: [
+    {
+      name: "Shiv Furniture",
+      logo: Building2,
+      plan: "Mini ERP",
+    },
+  ],
+
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: <LayoutDashboardIcon />,
+      icon: LayoutDashboard,
+      items: [
+        {
+          title: "Overview",
+          url: "/dashboard",
+        },
+      ],
     },
 
     {
       title: "Products",
       url: "/dashboard/products",
-      icon: <PackageIcon />,
+      icon: Package,
       items: [
         {
           title: "All Products",
           url: "/dashboard/products",
         },
         {
-          title: "Create Product",
+          title: "New Product",
           url: "/dashboard/products/new",
         },
       ],
@@ -64,19 +86,19 @@ const data = {
     {
       title: "Sales",
       url: "/dashboard/sales",
-      icon: <ShoppingCartIcon />,
+      icon: ShoppingCart,
       items: [
         {
           title: "Sales Orders",
-          url: "/dashboard/sales/orders",
+          url: "/dashboard/sales",
         },
         {
           title: "Deliveries",
-          url: "/dashboard/sales/deliveries",
+          url: "/dashboard/deliveries",
         },
         {
-          title: "Customers",
-          url: "/dashboard/sales/customers",
+          title: "Vendors",
+          url: "/dashboard/vendors",
         },
       ],
     },
@@ -84,19 +106,15 @@ const data = {
     {
       title: "Purchase",
       url: "/dashboard/purchase",
-      icon: <TruckIcon />,
+      icon: Truck,
       items: [
         {
           title: "Purchase Orders",
-          url: "/dashboard/purchase/orders",
-        },
-        {
-          title: "Receipts",
-          url: "/dashboard/purchase/receipts",
+          url: "/dashboard/purchase",
         },
         {
           title: "Vendors",
-          url: "/dashboard/purchase/vendors",
+          url: "/dashboard/vendors",
         },
       ],
     },
@@ -104,23 +122,11 @@ const data = {
     {
       title: "Manufacturing",
       url: "/dashboard/manufacturing",
-      icon: <FactoryIcon />,
+      icon: Factory,
       items: [
         {
           title: "Manufacturing Orders",
-          url: "/dashboard/manufacturing/orders",
-        },
-        {
-          title: "Work Orders",
-          url: "/dashboard/manufacturing/work-orders",
-        },
-        {
-          title: "Bills of Materials",
-          url: "/dashboard/manufacturing/boms",
-        },
-        {
-          title: "Work Centers",
-          url: "/dashboard/manufacturing/work-centers",
+          url: "/dashboard/manufacturing",
         },
       ],
     },
@@ -128,116 +134,75 @@ const data = {
     {
       title: "Inventory",
       url: "/dashboard/inventory",
-      icon: <WarehouseIcon />,
+      icon: Warehouse,
       items: [
         {
           title: "Stock Overview",
-          url: "/dashboard/inventory/stock",
-        },
-        {
-          title: "Stock Movements",
-          url: "/dashboard/inventory/movements",
-        },
-        {
-          title: "Reservations",
-          url: "/dashboard/inventory/reservations",
-        },
-        {
-          title: "Adjustments",
-          url: "/dashboard/inventory/adjustments",
-        },
-        {
-          title: "Warehouses",
-          url: "/dashboard/inventory/warehouses",
+          url: "/dashboard/inventory",
         },
       ],
     },
 
     {
-      title: "Procurement",
-      url: "/dashboard/procurement",
-      icon: <ClipboardListIcon />,
+      title: "Administration",
+      url: "/admin",
+      icon: Settings2,
       items: [
         {
-          title: "Procurement Requests",
-          url: "/dashboard/procurement/requests",
+          title: "Admin Panel",
+          url: "/admin",
         },
         {
-          title: "Procurement Rules",
-          url: "/dashboard/procurement/rules",
+          title: "Account",
+          url: "/account",
+        },
+        {
+          title: "Billing",
+          url: "/billing",
         },
       ],
     },
   ],
 
-  insights: [
+  projects: [
     {
-      title: "Reports",
-      url: "/dashboard/reports",
-      icon: <ChartNoAxesCombinedIcon />,
+      name: "Procurement",
+      url: "/dashboard/procurement",
+      icon: ClipboardList,
     },
     {
-      title: "Audit Logs",
-      url: "/dashboard/audit-logs",
-      icon: <FileClockIcon />,
-    },
-  ],
-
-  navSecondary: [
-    {
-      title: "Users & Access",
-      url: "/dashboard/admin/users",
-      icon: <UsersIcon />,
+      name: "Reports",
+      url: "/reports",
+      icon: ChartNoAxesCombined,
     },
     {
-      title: "Roles & Permissions",
-      url: "/dashboard/admin/roles",
-      icon: <ShieldCheckIcon />,
-    },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: <Settings2Icon />,
+      name: "Data Library",
+      url: "/data-library",
+      icon: FileClock,
     },
   ],
 }
 
 export function AppSidebar({
+  data = sidebarData,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: AppSidebarProps) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<a href="/dashboard" />}
-            >
-              <BoxesIcon className="size-5!" />
-
-              <span className="text-base font-semibold">
-                Mini ERP
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
 
       <SidebarContent>
         <NavMain items={data.navMain} />
-
-        <NavSecondary items={data.insights} />
-
-        <NavSecondary
-          items={data.navSecondary}
-          className="mt-auto"
-        />
+        <NavProjects projects={data.projects} />
       </SidebarContent>
 
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
   )
 }
