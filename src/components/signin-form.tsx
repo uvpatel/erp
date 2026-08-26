@@ -18,37 +18,28 @@ import { Input } from "@/components/ui/input"
 import { GitBranchIcon } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 
-export function SignupForm({
+export function SignInForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
-  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSignUp(e: React.FormEvent) {
+  async function handleEmailSignIn(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.")
-      return
-    }
-
     setLoading(true)
     try {
-      const res = await authClient.signUp.email({
+      const res = await authClient.signIn.email({
         email,
         password,
-        name: name || email.split("@")[0],
         callbackURL: "/dashboard",
       })
       if (res.error) {
-        setError(res.error.message || "Failed to create account.")
+        setError(res.error.message || "Failed to sign in. Please check your credentials.")
       } else {
         router.push("/dashboard")
       }
@@ -79,12 +70,12 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8" onSubmit={handleSignUp}>
+          <form className="p-6 md:p-8" onSubmit={handleEmailSignIn}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Create your account</h1>
-                <p className="text-sm text-balance text-muted-foreground">
-                  Enter your email below to create your account
+                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <p className="text-balance text-muted-foreground">
+                  Login to your Acme Inc account
                 </p>
               </div>
 
@@ -100,43 +91,28 @@ export function SignupForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <FieldDescription>
-                  We&apos;ll use this to contact you. We will not share your
-                  email with anyone else.
-                </FieldDescription>
               </Field>
               <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="confirm-password">
-                      Confirm Password
-                    </FieldLabel>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                  </Field>
-                </Field>
-                <FieldDescription>
-                  Must be at least 8 characters long.
-                </FieldDescription>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </Field>
               <Field>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Creating Account..." : "Create Account"}
+                  {loading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -145,7 +121,7 @@ export function SignupForm({
               <Field className="grid grid-cols-2 gap-4">
                 <Button variant="outline" type="button" onClick={loginWithGithub}>
                   <GitBranchIcon />
-                  <span className="sr-only">Sign up with Github</span>
+                  <span className="sr-only">Login with Github</span>
                 </Button>
                 <Button variant="outline" type="button" onClick={loginWithGoogle}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -154,13 +130,13 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign up with Google</span>
+                  <span className="sr-only">Login with Google</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Already have an account?{" "}
-                <Link href="/signin" className="underline underline-offset-4 hover:text-primary">
-                  Sign in
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
+                  Sign up
                 </Link>
               </FieldDescription>
             </FieldGroup>

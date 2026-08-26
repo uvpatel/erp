@@ -20,7 +20,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { authClient } from "@/lib/auth-client"
 import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation";
+
 
 export function NavUser({
   user,
@@ -32,6 +36,21 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+   const { data: session, isPending, error } = authClient.useSession();
+  const router = useRouter();
+   if (isPending) return <div>Loading...</div>;
+  if (!session) return <div>Not logged in</div>;
+
+   const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/signin"); // Redirect after successful logout
+        },
+      },
+    });
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -42,13 +61,13 @@ export function NavUser({
             }
           >
             <Avatar className="size-8 rounded-lg grayscale">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src={session.user.image ?? " "} alt={session.user.name} />
               <AvatarFallback className="rounded-lg">CN</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
+              <span className="truncate font-medium">{session.user.name}</span>
               <span className="truncate text-xs text-foreground/70">
-                {user.email}
+                {session.user.email}
               </span>
             </div>
             <EllipsisVerticalIcon className="ml-auto size-4" />
@@ -63,13 +82,13 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src={session.user.image ?? " "} alt={session.user.name} />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate font-medium">{session.user.name}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
+                      {session.user.email}
                     </span>
                   </div>
                 </div>
@@ -80,24 +99,27 @@ export function NavUser({
               <DropdownMenuItem>
                 <CircleUserRoundIcon
                 />
-                Account
+              <Link href="/account">   Account
+              </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon
                 />
-                Billing
+               <Link href="/billing">  Billing </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon
                 />
-                Notifications
+                <Link href="/notifications"> Notifications </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOutIcon
               />
-              Log out
+              <button onClick={handleLogout}>
+      Sign Out
+    </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
