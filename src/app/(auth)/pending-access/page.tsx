@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient, signOut, useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 
 export default function PendingAccessPage() {
   const router = useRouter();
@@ -33,8 +33,10 @@ export default function PendingAccessPage() {
   const checkStatus = async () => {
     setChecking(true);
     try {
-      const updated = await refetch();
-      const user = updated.data?.user as { role?: string; banned?: boolean } | undefined;
+      await refetch();
+      const res = await fetch("/api/auth/get-session");
+      const sessionData = await res.json();
+      const user = sessionData?.user as { role?: string; banned?: boolean } | undefined;
 
       if (user && user.role && user.role !== "pending" && !user.banned) {
         toast.success(`Access granted! Assigned role: ${user.role}`);
