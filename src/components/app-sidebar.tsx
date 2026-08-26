@@ -106,10 +106,7 @@ export const sidebarData: AppSidebarData = {
           title: "Purchase Orders",
           url: "/dashboard/purchase",
         },
-        {
-          title: "Vendors",
-          url: "/dashboard/vendors",
-        },
+      
       ],
     },
 
