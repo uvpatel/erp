@@ -9,6 +9,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { CirclePlusIcon, MailIcon } from "lucide-react"
+import { ModeToggle } from "./modetoggle"
+import Link from "next/link"
 
 export function NavMain({
   items,
@@ -37,7 +39,7 @@ export function NavMain({
               className="size-8 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
             >
-              <MailIcon
+              <ModeToggle
               />
               <span className="sr-only">Inbox</span>
             </Button>
@@ -48,7 +50,9 @@ export function NavMain({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton tooltip={item.title}>
                 {item.icon}
+             <Link href={item.url}>
                 <span>{item.title}</span>
+              </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
